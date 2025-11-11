@@ -57,7 +57,7 @@
             box-shadow: 0 0 0 3px rgba(254, 169, 1, 0.3); 
         }
         .result-item {
-            padding: 16px 0;
+            padding: 8px 0; /* Adjusted from 16px to 8px for tighter spacing */
             border-bottom: 1px dashed #d3d3d3; /* line-light */
             display: flex;
             justify-content: space-between;
@@ -180,10 +180,8 @@
 
             <div id="error-message" class="text-sm text-red-500 bg-red-100 p-2 rounded-md hidden mb-4"></div>
             
-            <!-- ALL DETAILS (Client Info + Transaction Info) NOW WRAPPED IN PRINT-ONLY BLOCK -->
-            <div id="input-details-for-print" class="mb-4 space-y-2 text-sm">
-                <!-- Data will be injected here by JS -->
-            </div>
+            <!-- ALL DETAILS (Client Info + Transaction Info) NOW WRAPPED IN PRINT-ONLY BLOCK --><div id="input-details-for-print" class="mb-4 space-y-2 text-sm">
+                <!-- Data will be injected here by JS --></div>
             <hr class="my-4 border-t-2 border-dashed border-line-light">
 
 
@@ -198,15 +196,15 @@
             </div>
 
             <!-- Total Penalty --><div class="result-item border-none">
-                <span class="text-primary-dark text-xl font-bold">Total Penalty</span>
-                <span id="total-penalty" class="text-2xl font-extrabold text-accent-red">₱0.00</span>
+                <span class="text-primary-dark text-l font-bold">Total Penalty</span>
+                <span id="total-penalty" class="text-xl font-extrabold text-accent-red">₱0.00</span>
             </div>
 
             <hr class="my-4 border-t-2 border-dashed border-line-light">
 
             <!-- Total Payment Due --><div class="result-item !p-0">
-                <span class="text-primary-dark text-xl font-bold">TOTAL PAYMENT DUE</span>
-                <span id="total-payment-due" class="text-3xl font-extrabold text-accent-red">₱0.00</span>
+                <span class="text-primary-dark text-l font-extrabold">TOTAL PAYMENT DUE</span>
+                <span id="total-payment-due" class="text-xl font-extrabold text-accent-red">₱0.00</span>
             </div>
             
             <!-- Disclaimer for print/display --><p class="text-xs text-secondary-gray italic mt-6 text-center print-disclaimer">
@@ -215,8 +213,7 @@
             
         </div>
         
-        <!-- Print Button - Now smaller and centered, using primary-dark color -->
-        <div class="flex justify-center">
+        <!-- Print Button - Now smaller and centered, using primary-dark color --><div class="flex justify-center">
             <button onclick="window.print()" id="printButton"
                     class="hidden bg-primary-dark hover:bg-secondary-gray text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-150 ease-in-out transform hover:scale-[1.01]">
                 Print
@@ -332,8 +329,7 @@
             // Wrap all details that should only appear on print inside the 'client-details-only' block
             const inputDetailsHtml = `
                 <div class="client-details-only space-y-3 pb-4">
-                    <!-- Static Client Details for manual entry on print - Taller lines for writing -->
-                    <div class="flex justify-between items-end">
+                    <!-- Static Client Details for manual entry on print - Taller lines for writing --><div class="flex justify-between items-end">
                         <span class="font-semibold text-primary-dark w-1/4">Client Name:</span>
                         <span class="text-primary-dark border-b-2 border-secondary-gray w-3/4 h-6"></span>
                     </div>
@@ -346,8 +342,7 @@
                         <span class="text-primary-dark border-b-2 border-secondary-gray w-3/4 h-6"></span>
                     </div>
                     <hr class="my-4 border-t-2 border-dashed border-line-light">
-                    <!-- Dynamic Transaction Details (Now print-only) -->
-                    <div class="flex justify-between">
+                    <!-- Dynamic Transaction Details (Now print-only) --><div class="flex justify-between">
                         <span class="font-semibold text-primary-dark">Amortization Amount:</span>
                         <span class="font-bold text-primary-dark">${amortizationValue}</span>
                     </div>
