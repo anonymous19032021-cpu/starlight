@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STARLIGHT VENTURES INC. | Penalty Calculator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use Inter font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-red': '#ef4444',
+                        'secondary-green': '#10b981',
+                        'gray-light': '#f3f4f6',
+                        'gray-dark': '#4b5563',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for a clean, modern look */
+        .input-group label {
+            font-weight: 500;
+            color: #4b5563; /* gray-dark */
+            margin-bottom: 4px;
+        }
+        .input-group input {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #ef4444; /* primary-red */
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+        .result-item {
+            padding: 12px 0;
+            border-bottom: 1px dashed #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-light min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="w-full max-w-lg bg-white shadow-2xl rounded-xl p-8 space-y-8">
+
+        <!-- Header -->
+        <header class="text-center">
+            <h1 class="text-3xl font-extrabold text-primary-red">
+                Penalty Computation
+            </h1>
+            <p class="text-gray-dark mt-2">
+                Calculate late payment fees based on a 1% monthly interest rate (30-day basis).
+            </p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="space-y-6">
+            <div class="input-group">
+                <label for="amortization">Monthly Amortization Amount (e.g., 15300)</label>
+                <input type="number" id="amortization" placeholder="Enter amount" value="15300" min="0" required>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label for="dueDate">Due Date</label>
+                    <input type="date" id="dueDate" required>
+                </div>
+                <div class="input-group">
+                    <label for="paymentDate">Date of Payment</label>
+                    <input type="date" id="paymentDate" required>
+                </div>
+            </div>
+
+            <button onclick="calculatePenalty()" 
+                    class="w-full bg-primary-red hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-150 ease-in-out transform hover:scale-[1.01]">
+                Calculate Penalty
+            </button>
+        </div>
+
+        <!-- Output Section -->
+        <div id="resultsCard" class="bg-gray-light p-6 rounded-lg border-t-4 border-primary-red transition-opacity duration-300 opacity-0 pointer-events-none">
+            
+            <h2 class="text-xl font-bold text-gray-dark mb-4">Computation Breakdown</h2>
+            
+            <div id="error-message" class="text-sm text-red-500 bg-red-100 p-2 rounded-md hidden mb-4"></div>
+
+            <!-- Days Past Due -->
+            <div class="result-item">
+                <span class="text-gray-dark">Days Past Due</span>
+                <span id="days-past-due" class="text-lg font-semibold text-primary-red">0 days</span>
+            </div>
+
+            <!-- Penalty per Day -->
+            <div class="result-item">
+                <span class="text-gray-dark">Daily Penalty Rate (1% / 30 days)</span>
+                <span id="penalty-per-day" class="text-lg font-semibold text-secondary-green">₱0.00</span>
+            </div>
+
+            <!-- Total Penalty -->
+            <div class="result-item border-none">
+                <span class="text-gray-dark text-xl font-bold">Total Penalty</span>
+                <span id="total-penalty" class="text-2xl font-extrabold text-primary-red">₱0.00</span>
+            </div>
+
+            <hr class="my-4 border-t-2 border-dashed border-gray-300">
+
+            <!-- Total Payment Due -->
+            <div class="result-item !p-0">
+                <span class="text-gray-dark text-xl font-bold">TOTAL PAYMENT DUE</span>
+                <span id="total-payment-due" class="text-3xl font-extrabold text-secondary-green">₱0.00</span>
+            </div>
+            
+        </div>
+
+    </div>
+
+    <script>
+        // Set the default date inputs to today for easier testing
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            const fiveDaysAgo = new Date();
+            fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+            
+            document.getElementById('dueDate').value = fiveDaysAgo.toISOString().split('T')[0];
+            document.getElementById('paymentDate').value = today;
+        });
+        
+        // Helper function for date difference
+        function getDateDifferenceInDays(date1, date2) {
+            const MS_PER_DAY = 1000 * 60 * 60 * 24;
+            const utc1 = Date.UTC(date1.getFullYear(), date1.getMonth(), date1.getDate());
+            const utc2 = Date.UTC(date2.getFullYear(), date2.getMonth(), date2.getDate());
+
+            return Math.floor((utc2 - utc1) / MS_PER_DAY);
+        }
+
+        // Helper function for currency formatting - NOW USES PHP
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-PH', { // Using 'en-PH' locale
+                style: 'currency',
+                currency: 'PHP', // Changed from USD to PHP
+                minimumFractionDigits: 2,
+            }).format(amount);
+        }
+
+        function calculatePenalty() {
+            const amortizationInput = document.getElementById('amortization');
+            const dueDateInput = document.getElementById('dueDate');
+            const paymentDateInput = document.getElementById('paymentDate');
+            const resultsCard = document.getElementById('resultsCard');
+            const errorMessage = document.getElementById('error-message');
+
+            // --- 1. Input Validation ---
+            errorMessage.classList.add('hidden');
+            
+            const amortization = parseFloat(amortizationInput.value);
+            const dueDate = new Date(dueDateInput.value);
+            const paymentDate = new Date(paymentDateInput.value);
+
+            if (isNaN(amortization) || amortization <= 0) {
+                errorMessage.textContent = 'Please enter a valid Monthly Amortization amount.';
+                errorMessage.classList.remove('hidden');
+                resultsCard.classList.remove('opacity-100', 'pointer-events-auto');
+                resultsCard.classList.add('opacity-0', 'pointer-events-none');
+                return;
+            }
+            if (isNaN(dueDate.getTime()) || isNaN(paymentDate.getTime())) {
+                 errorMessage.textContent = 'Please select both the Due Date and the Date of Payment.';
+                errorMessage.classList.remove('hidden');
+                resultsCard.classList.remove('opacity-100', 'pointer-events-auto');
+                resultsCard.classList.add('opacity-0', 'pointer-events-none');
+                return;
+            }
+
+
+            // --- 2. Core Calculation ---
+            
+            let daysPastDue = 0;
+            // Only calculate penalty if payment is made AFTER the due date
+            if (paymentDate > dueDate) {
+                 daysPastDue = getDateDifferenceInDays(dueDate, paymentDate);
+            }
+            
+            // Penalty Rate: 1% (0.01) divided by 30 days
+            const monthlyPenalty = amortization * 0.01;
+            const penaltyPerDay = monthlyPenalty / 30; // Divisor of 30 days (per day)
+            
+            // Total Penalty
+            const totalPenalty = penaltyPerDay * daysPastDue;
+            
+            // Total Payment Due
+            const totalPaymentDue = amortization + totalPenalty;
+
+            
+            // --- 3. Display Results ---
+
+            document.getElementById('days-past-due').textContent = `${daysPastDue} days`;
+            document.getElementById('penalty-per-day').textContent = formatCurrency(penaltyPerDay);
+            document.getElementById('total-penalty').textContent = formatCurrency(totalPenalty);
+            document.getElementById('total-payment-due').textContent = formatCurrency(totalPaymentDue);
+            
+            // Show the results card smoothly
+            resultsCard.classList.add('opacity-100', 'pointer-events-auto');
+            resultsCard.classList.remove('opacity-0', 'pointer-events-none');
+        }
+    </script>
+
+</body>
+</html>
