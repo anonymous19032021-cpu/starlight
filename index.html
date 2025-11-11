@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARLIGHT VENTURES INC. | Penalty Calculator</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Configure Tailwind to use Inter font -->
-    <script>
+    <title>Loan Penalty Calculator</title>
+    <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind with the new color palette --><script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -15,37 +13,52 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        'primary-red': '#ef4444',
-                        'secondary-green': '#10b981',
-                        'gray-light': '#f3f4f6',
-                        'gray-dark': '#4b5563',
+                        'primary-dark': '#3a556e',    // Dark Blue/Gray - Text, Heading
+                        'accent-orange': '#fea901',   // Orange/Yellow - Action Button, Highlight
+                        'accent-red': '#dc2626',      // Red - For Days Past Due, Penalty, and Total Due
+                        'card-bg': '#e8e8e0',         // Light Off-White/Cream - Card Background
+                        'secondary-gray': '#738393',  // Medium Gray/Blue - Secondary Text, Borders
+                        'line-light': '#d3d3d3',      // Light Gray - Fine Lines/Borders
                     }
                 }
             }
         }
     </script>
     <style>
+        /* Subtle texture background on the body */
+        body.textured-bg {
+            background-color: #f0f0e8; /* Base color */
+            background-image: repeating-linear-gradient(
+                45deg,
+                #f0f0e8 0,
+                #f0f0e8 1px,
+                #fafaf8 1px, /* Slightly lighter color for texture */
+                #fafaf8 10px
+            );
+        }
+        
         /* Custom styles for a clean, modern look */
         .input-group label {
             font-weight: 500;
-            color: #4b5563; /* gray-dark */
+            color: #3a556e; /* primary-dark */
             margin-bottom: 4px;
         }
         .input-group input {
             padding: 10px;
-            border: 1px solid #d1d5db;
+            border: 1px solid #d3d3d3;
             border-radius: 8px;
             width: 100%;
             transition: all 0.2s;
         }
         .input-group input:focus {
             outline: none;
-            border-color: #ef4444; /* primary-red */
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+            border-color: #fea901; /* accent-orange */
+            /* Adjusted shadow color to match the new accent */
+            box-shadow: 0 0 0 3px rgba(254, 169, 1, 0.3); 
         }
         .result-item {
-            padding: 12px 0;
-            border-bottom: 1px dashed #e5e7eb;
+            padding: 16px 0;
+            border-bottom: 1px dashed #d3d3d3; /* line-light */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -54,27 +67,92 @@
             border-bottom: none;
             padding-bottom: 0;
         }
+
+        /* HIDE: Client details fields and Transaction details on screen (default) */
+        .client-details-only {
+            display: none; 
+        }
+
+        /* --- Print Styles: Make a clean receipt when printed --- */
+        @media print {
+            body * {
+                -webkit-print-color-adjust: exact !important; 
+                color-adjust: exact !important; 
+            }
+
+            .textured-bg, .min-h-screen, .flex, .items-center, .justify-center {
+                background-color: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .w-full.max-w-lg {
+                width: 100%;
+                max-width: 100%;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            /* Hide all interactive elements */
+            .space-y-6, 
+            #printButton, 
+            header p, 
+            #error-message, 
+            .header-info-section {
+                display: none !important;
+            }
+            
+            /* Customize Header for the printed receipt */
+            header {
+                text-align: left;
+                margin-bottom: 1rem;
+            }
+            header h1 {
+                font-size: 1.5rem !important; 
+                color: #000 !important; 
+                font-weight: bold;
+                border-bottom: 2px solid #ccc;
+                padding-bottom: 5px;
+            }
+            
+            /* Ensure results card is visible and clean */
+            #resultsCard {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                background-color: white !important; 
+                border: 1px solid #000; 
+                padding: 1.5rem !important; 
+            }
+
+            .client-details-only {
+                display: block !important;
+            }
+
+            /* Ensure print colors match new palette */
+            .text-accent-orange { color: #fea901 !important; }
+            .text-accent-red { color: #dc2626 !important; } /* New Red for print */
+            .text-primary-dark { color: #3a556e !important; }
+            .text-secondary-gray { color: #738393 !important; }
+            .text-gray-500 { color: #6b7280 !important; } 
+        }
     </style>
 </head>
-<body class="bg-gray-light min-h-screen flex items-center justify-center p-4 font-sans">
+<body class="textured-bg min-h-screen flex items-center justify-center p-4 font-sans">
 
-    <div class="w-full max-w-lg bg-white shadow-2xl rounded-xl p-8 space-y-8">
+    <div class="w-full max-w-lg bg-card-bg shadow-2xl rounded-xl p-8 space-y-8">
 
-        <!-- Header -->
-        <header class="text-center">
-            <h1 class="text-3xl font-extrabold text-primary-red">
-                PENALTY COMPUTATION
+        <!-- Header --><header class="text-center">
+            <h1 class="text-3xl font-extrabold text-primary-dark">
+                Penalty Computation
             </h1>
-            <p class="text-gray-dark mt-2">
+            <p class="text-secondary-gray mt-2 header-info-section">
                 Calculate late payment fees based on a 1% monthly interest rate (30-day basis).
             </p>
         </header>
 
-        <!-- Input Section -->
-        <div class="space-y-6">
+        <!-- Input Section --><div class="space-y-6">
             <div class="input-group">
-                <label for="amortization">Monthly Amortization Amount (e.g., 15,300.00)</label>
-                <input type="number" id="amortization" placeholder="Enter amount" value="15,300.00" min="0" required>
+                <label for="amortization">Monthly Amortization Amount (e.g., 15300)</label>
+                <input type="number" id="amortization" placeholder="Enter amount" value="15300" min="0" required>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -89,45 +167,62 @@
             </div>
 
             <button onclick="calculatePenalty()" 
-                    class="w-full bg-primary-red hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-150 ease-in-out transform hover:scale-[1.01]">
+                    class="w-full bg-accent-orange hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-150 ease-in-out transform hover:scale-[1.01]">
                 Calculate Penalty
             </button>
         </div>
 
-        <!-- Output Section -->
-        <div id="resultsCard" class="bg-gray-light p-6 rounded-lg border-t-4 border-primary-red transition-opacity duration-300 opacity-0 pointer-events-none">
+        <!-- Output Section --><div id="resultsCard" class="bg-card-bg p-6 rounded-lg border-t-4 border-accent-orange transition-opacity duration-300 opacity-0 pointer-events-none">
             
-            <h2 class="text-xl font-bold text-gray-dark mb-4">Computation Breakdown</h2>
+            <h2 class="text-xl font-bold text-primary-dark mb-4">Computation Breakdown</h2>
             
+            <!-- Timestamp Element --><div id="calculation-timestamp" class="text-sm text-secondary-gray mb-4 border-b pb-2"></div>
+
             <div id="error-message" class="text-sm text-red-500 bg-red-100 p-2 rounded-md hidden mb-4"></div>
+            
+            <!-- ALL DETAILS (Client Info + Transaction Info) NOW WRAPPED IN PRINT-ONLY BLOCK -->
+            <div id="input-details-for-print" class="mb-4 space-y-2 text-sm">
+                <!-- Data will be injected here by JS -->
+            </div>
+            <hr class="my-4 border-t-2 border-dashed border-line-light">
 
-            <!-- Days Past Due -->
-            <div class="result-item">
-                <span class="text-gray-dark">Days Past Due</span>
-                <span id="days-past-due" class="text-lg font-semibold text-primary-red">0 days</span>
+
+            <!-- Days Past Due --><div class="result-item">
+                <span class="text-primary-dark">Days Past Due</span>
+                <span id="days-past-due" class="text-lg font-semibold text-accent-red">0 days</span>
             </div>
 
-            <!-- Penalty per Day -->
-            <div class="result-item">
-                <span class="text-gray-dark">Daily Penalty Rate (1% / 30 days)</span>
-                <span id="penalty-per-day" class="text-lg font-semibold text-secondary-green">₱0.00</span>
+            <!-- Penalty per Day --><div class="result-item">
+                <span class="text-primary-dark">Daily Penalty Rate (1% / 30 days)</span>
+                <span id="penalty-per-day" class="text-lg font-semibold text-primary-dark">₱0.00</span>
             </div>
 
-            <!-- Total Penalty -->
-            <div class="result-item border-none">
-                <span class="text-gray-dark text-xl font-bold">Total Penalty</span>
-                <span id="total-penalty" class="text-2xl font-extrabold text-primary-red">₱0.00</span>
+            <!-- Total Penalty --><div class="result-item border-none">
+                <span class="text-primary-dark text-xl font-bold">Total Penalty</span>
+                <span id="total-penalty" class="text-2xl font-extrabold text-accent-red">₱0.00</span>
             </div>
 
-            <hr class="my-4 border-t-2 border-dashed border-gray-300">
+            <hr class="my-4 border-t-2 border-dashed border-line-light">
 
-            <!-- Total Payment Due -->
-            <div class="result-item !p-0">
-                <span class="text-gray-dark text-xl font-bold">TOTAL PAYMENT DUE</span>
-                <span id="total-payment-due" class="text-3xl font-extrabold text-secondary-green">₱0.00</span>
+            <!-- Total Payment Due --><div class="result-item !p-0">
+                <span class="text-primary-dark text-xl font-bold">TOTAL PAYMENT DUE</span>
+                <span id="total-payment-due" class="text-3xl font-extrabold text-accent-red">₱0.00</span>
             </div>
+            
+            <!-- Disclaimer for print/display --><p class="text-xs text-secondary-gray italic mt-6 text-center print-disclaimer">
+                Disclaimer: The result shown on this calculator is for reference only and is NOT official.
+            </p>
             
         </div>
+        
+        <!-- Print Button - Now smaller and centered, using primary-dark color -->
+        <div class="flex justify-center">
+            <button onclick="window.print()" id="printButton"
+                    class="hidden bg-primary-dark hover:bg-secondary-gray text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-150 ease-in-out transform hover:scale-[1.01]">
+                Print
+            </button>
+        </div>
+
 
     </div>
 
@@ -166,9 +261,13 @@
             const paymentDateInput = document.getElementById('paymentDate');
             const resultsCard = document.getElementById('resultsCard');
             const errorMessage = document.getElementById('error-message');
+            const printButton = document.getElementById('printButton'); 
+            const timestampElement = document.getElementById('calculation-timestamp'); 
+            const inputDetailsPrintElement = document.getElementById('input-details-for-print');
 
             // --- 1. Input Validation ---
             errorMessage.classList.add('hidden');
+            printButton.classList.add('hidden'); // Hide print button initially
             
             const amortization = parseFloat(amortizationInput.value);
             const dueDate = new Date(dueDateInput.value);
@@ -209,8 +308,63 @@
             const totalPaymentDue = amortization + totalPenalty;
 
             
-            // --- 3. Display Results ---
+            // --- 3. Display Results and Context ---
+            
+            // 3a. Format and display current time of calculation
+            const now = new Date();
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true 
+            };
+            const formattedTimestamp = new Intl.DateTimeFormat('en-US', options).format(now);
+            timestampElement.textContent = `Calculated on: ${formattedTimestamp}`;
 
+            // 3b. Format and inject Input Details for Receipt (Client Details + Transaction Details)
+            const amortizationValue = formatCurrency(amortization);
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            const dueDateString = new Date(dueDateInput.value).toLocaleDateString('en-US', dateOptions);
+            const paymentDateString = new Date(paymentDateInput.value).toLocaleDateString('en-US', dateOptions);
+
+            // Wrap all details that should only appear on print inside the 'client-details-only' block
+            const inputDetailsHtml = `
+                <div class="client-details-only space-y-3 pb-4">
+                    <!-- Static Client Details for manual entry on print - Taller lines for writing -->
+                    <div class="flex justify-between items-end">
+                        <span class="font-semibold text-primary-dark w-1/4">Client Name:</span>
+                        <span class="text-primary-dark border-b-2 border-secondary-gray w-3/4 h-6"></span>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <span class="font-semibold text-primary-dark w-1/4">Project:</span>
+                        <span class="text-primary-dark border-b-2 border-secondary-gray w-3/4 h-6"></span>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <span class="font-semibold text-primary-dark w-1/4">Block / Lot:</span>
+                        <span class="text-primary-dark border-b-2 border-secondary-gray w-3/4 h-6"></span>
+                    </div>
+                    <hr class="my-4 border-t-2 border-dashed border-line-light">
+                    <!-- Dynamic Transaction Details (Now print-only) -->
+                    <div class="flex justify-between">
+                        <span class="font-semibold text-primary-dark">Amortization Amount:</span>
+                        <span class="font-bold text-primary-dark">${amortizationValue}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-semibold text-primary-dark">Due Date:</span>
+                        <span class="text-primary-dark">${dueDateString}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="font-semibold text-primary-dark">Payment Date:</span>
+                        <span class="text-primary-dark">${paymentDateString}</span>
+                    </div>
+                </div>
+            `;
+            inputDetailsPrintElement.innerHTML = inputDetailsHtml;
+
+
+            // 3c. Display Calculation Results
             document.getElementById('days-past-due').textContent = `${daysPastDue} days`;
             document.getElementById('penalty-per-day').textContent = formatCurrency(penaltyPerDay);
             document.getElementById('total-penalty').textContent = formatCurrency(totalPenalty);
@@ -219,9 +373,11 @@
             // Show the results card smoothly
             resultsCard.classList.add('opacity-100', 'pointer-events-auto');
             resultsCard.classList.remove('opacity-0', 'pointer-events-none');
+            
+            // Show the print button
+            printButton.classList.remove('hidden');
         }
     </script>
 
 </body>
-
 </html>
